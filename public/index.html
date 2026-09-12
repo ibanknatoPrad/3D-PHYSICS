@@ -1,0 +1,359 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Electromagnetism Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Three.js + OrbitControls via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <!-- Ambient liquid-glass background shader canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Main 3D WebGL Canvas -->
+  <canvas id="main-canvas"></canvas>
+
+  <!-- Top Status Bar & Blueprint Toggle -->
+  <header class="top-nav">
+    <div class="brand">
+      <div class="brand-badge"></div>
+      <div class="brand-text">
+        <span class="brand-title">ELECTROMAGNETISM SUITE</span>
+        <span class="brand-sub">RESEARCH & EDUCATIONAL PLATFORM</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <div class="live-stats">
+        <span class="stat-pill" id="fps-stat">60 FPS</span>
+        <span class="stat-pill" id="draw-stat">4.2k VTX</span>
+      </div>
+      <button class="blueprint-btn" id="btn-blueprint" title="Toggle Blueprint Technical Wireframe Mode">
+        <span class="bp-icon">⬡</span>
+        <span class="bp-text">BLUEPRINT MODE</span>
+        <span class="bp-indicator"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Frosted Glass Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-label">SIMULATION MODULES</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-scene="biot-savart">
+        <div class="nav-btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9" stroke-width="1.6"/><path d="M12 3v18M3 12h18" stroke-width="1.2" stroke-dasharray="2 2"/></svg>
+        </div>
+        <div class="nav-btn-info">
+          <span class="nav-title">Biot–Savart Law</span>
+          <span class="nav-subtitle">Circulating Particle Flow</span>
+        </div>
+      </button>
+
+      <button class="nav-btn" data-scene="flemings">
+        <div class="nav-btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 11V5a2 2 0 0 1 4 0v6M11 5a2 2 0 0 1 4 0v6M15 7a2 2 0 0 1 4 0v7a6 6 0 0 1-6 6H9a5 5 0 0 1-5-5v-4a2 2 0 0 1 4 0" stroke-width="1.6"/></svg>
+        </div>
+        <div class="nav-btn-info">
+          <span class="nav-title">Fleming’s Rules</span>
+          <span class="nav-subtitle">Auto-Aligning Vector Hand</span>
+        </div>
+      </button>
+
+      <button class="nav-btn" data-scene="lorentz">
+        <div class="nav-btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 0 1 10 10c0 5.5-4.5 10-10 10S2 17.5 2 12a10 10 0 0 1 7-9.5M12 6a6 6 0 0 1 6 6c0 3.3-2.7 6-6 6s-6-2.7-6-6" stroke-width="1.6"/></svg>
+        </div>
+        <div class="nav-btn-info">
+          <span class="nav-title">Lorentz Force</span>
+          <span class="nav-subtitle">Continuous Helix Emitter</span>
+        </div>
+      </button>
+
+      <button class="nav-btn" data-scene="faraday">
+        <div class="nav-btn-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 14a8 8 0 0 1 16 0M2 14h20M7 14v4a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-4" stroke-width="1.6"/><circle cx="12" cy="7" r="2" fill="currentColor"/></svg>
+        </div>
+        <div class="nav-btn-info">
+          <span class="nav-title">Faraday’s Law</span>
+          <span class="nav-subtitle">Interactive 3D Hologram Graph</span>
+        </div>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="controls-hint">
+        <span class="hint-key">L-CLICK</span> Rotate
+        <span class="hint-sep">·</span>
+        <span class="hint-key">R-CLICK</span> Pan
+        <span class="hint-sep">·</span>
+        <span class="hint-key">SCROLL</span> Zoom
+      </div>
+      <div class="hint-sub">Hover objects for live Raycasting highlight</div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════ FLOATING CONTROLS ═══════════════════════════ -->
+
+  <!-- Panel: Biot-Savart Law -->
+  <section class="control-panel" id="panel-biot-savart">
+    <div class="panel-header">
+      <div class="panel-tag">MAGNETOSTATICS</div>
+      <h2 class="panel-name">Biot–Savart Law</h2>
+      <div class="equation-box">
+        <span class="eq-symbol">dB</span> = 
+        <span class="eq-fraction">
+          <span class="eq-num">μ₀ · I</span>
+          <span class="eq-den">4π</span>
+        </span>
+        · 
+        <span class="eq-fraction">
+          <span class="eq-num">dl × r̂</span>
+          <span class="eq-den">r²</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="bs-current">Current Intensity (I)</label>
+        <span class="val-badge" id="bs-current-val">6.0 A</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="bs-current" min="0.5" max="20" step="0.1" value="6.0" />
+      </div>
+      <div class="control-meta">Increases particle circulation velocity and B-field luminosity</div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="bs-density">Particle Density</label>
+        <span class="val-badge" id="bs-density-val">1200</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="bs-density" min="300" max="2400" step="100" value="1200" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="bs-radius">Concentric Shell Radii</label>
+        <span class="val-badge" id="bs-radius-val">3 Shells</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="bs-radius" min="1" max="5" step="1" value="3" />
+      </div>
+    </div>
+
+    <div class="panel-readout">
+      <div class="readout-item">
+        <span class="ro-label">B(r = 1.0 m)</span>
+        <span class="ro-value" id="bs-b1-calc">1.20 μT</span>
+      </div>
+      <div class="readout-item">
+        <span class="ro-label">Vector Flow</span>
+        <span class="ro-value" id="bs-curl">Right-Hand Curl</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel: Fleming's Rules -->
+  <section class="control-panel hidden" id="panel-flemings">
+    <div class="panel-header">
+      <div class="panel-tag">ELECTRODYNAMICS</div>
+      <h2 class="panel-name">Fleming’s Rules</h2>
+      <div class="equation-box">
+        <span class="eq-symbol">F</span> = <span class="eq-num">I · (L × B)</span> 
+        <span class="eq-sep">|</span> 
+        <span class="eq-symbol">ε</span> = <span class="eq-num">(v × B) · L</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Operational Mode</label>
+      <div class="segmented-control">
+        <button class="seg-btn active" id="fl-left">Left Hand (Motor)</button>
+        <button class="seg-btn" id="fl-right">Right Hand (Generator)</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="fl-angle">Magnetic Pole Rotation</label>
+        <span class="val-badge" id="fl-angle-val">0°</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="fl-angle" min="-180" max="180" step="1" value="0" />
+      </div>
+      <div class="control-meta">Drag poles in 3D or adjust slider to trigger hand auto-alignment</div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="fl-speed">Loop Angular Velocity</label>
+        <span class="val-badge" id="fl-speed-val">1.2 rad/s</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="fl-speed" min="0" max="4" step="0.1" value="1.2" />
+      </div>
+    </div>
+
+    <div class="vector-legend">
+      <div class="legend-row">
+        <span class="legend-pip f-pip"></span>
+        <span class="legend-name">Thumb: Force / Motion [F]</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-pip b-pip"></span>
+        <span class="legend-name">Index: Magnetic Field [B]</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-pip i-pip"></span>
+        <span class="legend-name">Middle: Current Flow [I]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel: Lorentz Force -->
+  <section class="control-panel hidden" id="panel-lorentz">
+    <div class="panel-header">
+      <div class="panel-tag">PARTICLE KINEMATICS</div>
+      <h2 class="panel-name">Lorentz Force</h2>
+      <div class="equation-box">
+        <span class="eq-symbol">F</span> = <span class="eq-num">q · (E + v × B)</span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Particle Species</label>
+      <div class="segmented-control">
+        <button class="seg-btn active" id="lz-proton">+ Proton (1.67×10⁻²⁷ kg)</button>
+        <button class="seg-btn" id="lz-electron">− Electron (9.11×10⁻³¹ kg)</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="lz-bfield">B-Field Strength (B)</label>
+        <span class="val-badge" id="lz-bfield-val">1.8 T</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="lz-bfield" min="0.2" max="4.0" step="0.1" value="1.8" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="lz-pitch">B-Field Pitch Angle (θ)</label>
+        <span class="val-badge" id="lz-pitch-val">0°</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="lz-pitch" min="-90" max="90" step="1" value="0" />
+      </div>
+      <div class="control-meta">Rotates B-vector in Y-Z plane to stretch / compress helix pitch</div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="lz-yaw">B-Field Yaw Angle (φ)</label>
+        <span class="val-badge" id="lz-yaw-val">0°</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="lz-yaw" min="-90" max="90" step="1" value="0" />
+      </div>
+      <div class="control-meta">Rotates B-vector in X-Y plane across particle injection axis</div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="lz-velocity">Injection Velocity (v₀)</label>
+        <span class="val-badge" id="lz-velocity-val">2.5×</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="lz-velocity" min="0.5" max="5.0" step="0.1" value="2.5" />
+      </div>
+    </div>
+
+    <div class="panel-readout">
+      <div class="readout-item">
+        <span class="ro-label">Cyclotron Rad. (r)</span>
+        <span class="ro-value" id="lz-radius-readout">1.44 m</span>
+      </div>
+      <div class="readout-item">
+        <span class="ro-label">Gyrofrequency</span>
+        <span class="ro-value" id="lz-freq-readout">27.4 MHz</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Panel: Faraday's Law -->
+  <section class="control-panel hidden" id="panel-faraday">
+    <div class="panel-header">
+      <div class="panel-tag">ELECTROMAGNETIC INDUCTION</div>
+      <h2 class="panel-name">Faraday’s Law</h2>
+      <div class="equation-box">
+        <span class="eq-symbol">ε</span> = <span class="eq-num">− N · </span>
+        <span class="eq-fraction">
+          <span class="eq-num">dΦ_B</span>
+          <span class="eq-den">dt</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="fd-turns">Coil Turn Density (N)</label>
+        <span class="val-badge" id="fd-turns-val">10 Turns</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="fd-turns" min="4" max="24" step="1" value="10" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <div class="label-row">
+        <label for="fd-dipole">Magnet Dipole Moment</label>
+        <span class="val-badge" id="fd-dipole-val">2.0 T·m³</span>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="fd-dipole" min="0.5" max="4.0" step="0.1" value="2.0" />
+      </div>
+    </div>
+
+    <div class="control-group">
+      <button class="action-btn" id="fd-auto-btn">
+        <span class="btn-play-icon">▶</span>
+        <span class="btn-text">AUTO-OSCILLATE MAGNET</span>
+      </button>
+      <div class="control-meta">Or click &amp; drag the bar magnet horizontally in 3D space</div>
+    </div>
+
+    <div class="hud-telemetry">
+      <div class="telemetry-bar-header">
+        <span>INDUCED EMF INSTANTANEOUS</span>
+        <span id="emf-volts">0.00 V</span>
+      </div>
+      <div class="telemetry-track">
+        <div class="telemetry-fill" id="emf-level"></div>
+      </div>
+      <div class="telemetry-graph-label">Real-time 3D Hologram Graph rendering inside chamber</div>
+    </div>
+  </section>
+
+  <!-- Floating Raycast Hover Target Tag -->
+  <div class="raycast-tag" id="raycast-tag"></div>
+
+  <!-- Main Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
+

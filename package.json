@@ -1,0 +1,15 @@
+﻿{
+  "name": "electromagnetism-suite",
+  "version": "1.0.0",
+  "description": "Interactive 3D Electromagnetism Physics Lab",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev":   "node server.js"
+  },
+  "keywords": ["physics", "three.js", "webgl", "electromagnetism"],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
