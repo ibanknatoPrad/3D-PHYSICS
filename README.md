@@ -3,7 +3,8 @@
  <img width="906" height="425" alt="image" src="https://github.com/user-attachments/assets/f6eb2d40-3ce3-4c10-9a3c-0dc95baa4046" />
 
 
-  <img width="906" height="425" alt="image" src="https://ibanknatoprad.github.io/3D-PHYSICS/biot-savart-d3e.gif" />
+  <img width="906" height="425" alt="image" src="https://github.com/ibanknatoPrad/3D-PHYSICS/blob/main/biot-savart-d3e.gif" />
+
 
 
 
