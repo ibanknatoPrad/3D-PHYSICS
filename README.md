@@ -1,5 +1,12 @@
 ﻿# Electromagnetism Suite ⚡
 
+ <img width="906" height="425" alt="image" src="https://github.com/user-attachments/assets/f6eb2d40-3ce3-4c10-9a3c-0dc95baa4046" />
+
+
+  <img width="906" height="425" alt="image" src="https://ibanknatoprad.github.io/3D-PHYSICS/biot-savart-d3e.gif" />
+
+
+
 An interactive, high-performance 3D physics educational platform built with **Three.js** and Vanilla JavaScript/WebGL, styled with a calm, cool luxury dark frosted glass aesthetic.
 
 ## Features
